@@ -34,7 +34,7 @@ public class Play extends BasicGameState{
     @Override
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g){
         g.drawImage(backgroundImage, 0, 0);
-        g.drawImage(ship.getImage(), ship.getPositionX(), ship.getPositionY());
+        g.drawImage(ship.getCurrentImage(), ship.getPositionX(), ship.getPositionY());
         g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
     }
 
@@ -43,6 +43,11 @@ public class Play extends BasicGameState{
         Input input = gc.getInput();
         ship.move(input);
         rock.move();
+
+        // Collisions
+        if(ship.getCollider().intersects(rock.getCollider())){
+            System.out.println("Ow!");
+        }
 
     }
 }

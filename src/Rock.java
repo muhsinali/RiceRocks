@@ -1,4 +1,6 @@
 import org.newdawn.slick.Image;
+import org.newdawn.slick.geom.Circle;
+import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.SlickException;
 
 import java.util.ArrayList;
@@ -19,8 +21,10 @@ public class Rock {
     private int angle;
     private int angularVelocity;
 
-    public static List<Rock> rockArray = new ArrayList<>();
+    //public static List<Rock> rockArray = new ArrayList<>();
     private Image currentImage;
+
+    private Shape collider;
 
     public Rock(String imagePath){
         try{
@@ -34,9 +38,10 @@ public class Rock {
             velocity = random.nextInt(5) + 5;       // these are just arbitrary numbers atm
             angularVelocity = random.nextInt(8) + 2;
             angle = random.nextInt(360);
-            velocityX = (int) (velocity * Math.cos(Math.toRadians(angle)));
-            velocityY = (int) (velocity * Math.sin(Math.toRadians(angle)));
+            velocityX = (int) Math.round((velocity * Math.cos(Math.toRadians(angle))));
+            velocityY = (int) Math.round((velocity * Math.sin(Math.toRadians(angle))));
 
+            collider = new Circle(positionX + width / 2, positionY + height / 2, width / 2);
             currentImage.setRotation(angle);
         }catch(SlickException e){
             e.printStackTrace();
@@ -49,11 +54,13 @@ public class Rock {
         currentImage.setRotation(angle);
         positionX += velocityX;
         positionY += velocityY;
-        wrapRock();
+        wrap();
+        collider.setCenterX(positionX);
+        collider.setCenterY(positionY);
     }
 
 
-    private void wrapRock(){
+    public void wrap(){
         if(positionX + currentImage.getCenterOfRotationX() < 0){
             positionX += Game.FRAME_WIDTH;
         } else if (positionX + currentImage.getCenterOfRotationX() >= Game.FRAME_WIDTH){
@@ -69,6 +76,10 @@ public class Rock {
 
 
     // GETTERS
+    public Shape getCollider(){
+        return collider;
+    }
+
     public Image getCurrentImage(){
         return currentImage;
     }
