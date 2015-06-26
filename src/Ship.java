@@ -77,7 +77,7 @@ public class Ship {
         }
     }
 
-    public void wrap(){
+    private void wrap(){
         if(positionX + currentImage.getCenterOfRotationX() < 0){    // What is the centerOfRotationX exactly?
             positionX += Game.FRAME_WIDTH;
         } else if (positionX + currentImage.getCenterOfRotationX() >= Game.FRAME_WIDTH){

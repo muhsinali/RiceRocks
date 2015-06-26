@@ -3,13 +3,15 @@ import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.SlickException;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
+
 public class Rock {
-    // randomly add rocks at certain intervals. Check if there's < maxRocks? If so, add more. Make sure that when you
-    // destroy rocks that you remove that destroyed rock from the array.
+    public static int MAX_ROCKS = 2;
+
+    private Image currentImage;
+
+    // Physics
     private int height;
     private int width;
     private int positionX;
@@ -17,41 +19,44 @@ public class Rock {
     private int velocity;
     private int velocityX;
     private int velocityY;
-
     private int angle;
     private int angularVelocity;
-
-    //public static List<Rock> rockArray = new ArrayList<>();
-    private Image currentImage;
-
     private Shape collider;
 
-    public Rock(String imagePath){
+
+    public Rock(){
         try{
-            currentImage = new Image(imagePath);
+            currentImage = new Image("res/images/asteroid_blue.png");
             width = currentImage.getWidth();
             height = currentImage.getHeight();
-
-            Random random = new Random();
-            positionX = random.nextInt(Game.FRAME_WIDTH - width);
-            positionY = random.nextInt(Game.FRAME_HEIGHT - height);
-            velocity = random.nextInt(5) + 5;       // these are just arbitrary numbers atm
-            angularVelocity = random.nextInt(8) + 2;
-            angle = random.nextInt(360);
-            velocityX = (int) Math.round((velocity * Math.cos(Math.toRadians(angle))));
-            velocityY = (int) Math.round((velocity * Math.sin(Math.toRadians(angle))));
-
-            collider = new Circle(positionX + width / 2, positionY + height / 2, width / 2);
-            currentImage.setRotation(angle);
+            initialisePhysics();
         }catch(SlickException e){
             e.printStackTrace();
         }
     }
 
-    public void move(){
-        angle += angularVelocity;
-        angle %= 360;
+    private void initialisePhysics(){
+        // These are just arbitrary numbers atm
+        Random random = new Random();
+
+        // Rotational motion
+        angularVelocity = random.nextInt(8) + 2;
+        angle = random.nextInt(360);
         currentImage.setRotation(angle);
+
+        // Translational motion
+        positionX = random.nextInt(Game.FRAME_WIDTH - width);
+        positionY = random.nextInt(Game.FRAME_HEIGHT - height);
+        velocity = random.nextInt(4) + 3;
+        velocityX = (int) Math.round((velocity * Math.cos(Math.toRadians(angle))));
+        velocityY = (int) Math.round((velocity * Math.sin(Math.toRadians(angle))));
+
+        // Collision detection
+        collider = new Circle(positionX + width / 2, positionY + height / 2, width / 2);
+    }
+
+    public void move(){
+        currentImage.rotate(angularVelocity);
         positionX += velocityX;
         positionY += velocityY;
         wrap();
@@ -60,7 +65,7 @@ public class Rock {
     }
 
 
-    public void wrap(){
+    private void wrap(){
         if(positionX + currentImage.getCenterOfRotationX() < 0){
             positionX += Game.FRAME_WIDTH;
         } else if (positionX + currentImage.getCenterOfRotationX() >= Game.FRAME_WIDTH){
