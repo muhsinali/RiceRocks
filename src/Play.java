@@ -10,6 +10,7 @@ import org.newdawn.slick.state.StateBasedGame;
 public class Play extends BasicGameState{
     private Image backgroundImage;
     private Ship ship;
+    private Rock rock;
 
 
     @Override
@@ -22,6 +23,7 @@ public class Play extends BasicGameState{
         try{
             backgroundImage = new Image("res/images/nebula_blue.png");
             ship = new Ship("res/images/double_ship.png");
+            rock = new Rock("res/images/asteroid_blue.png");
         } catch(SlickException e){
             e.printStackTrace();
         }
@@ -33,12 +35,14 @@ public class Play extends BasicGameState{
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g){
         g.drawImage(backgroundImage, 0, 0);
         g.drawImage(ship.getImage(), ship.getPositionX(), ship.getPositionY());
+        g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
     }
 
     @Override
     public void update(GameContainer gc, StateBasedGame sbg, int delta){
         Input input = gc.getInput();
         ship.move(input);
+        rock.move();
 
     }
 }

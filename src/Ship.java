@@ -52,7 +52,18 @@ public class Ship {
             currentImage = images[0];
         }
 
+        wrapShip();
+    }
 
+
+    private void rotate(int deltaAngle){
+        angle += deltaAngle;
+        for(Image image : images){
+            image.setRotation(angle);
+        }
+    }
+
+    private void wrapShip(){
         if(positionX + currentImage.getCenterOfRotationX() < 0){    // What is the centerOfRotationX exactly?
             positionX += Game.FRAME_WIDTH;
         } else if (positionX + currentImage.getCenterOfRotationX() >= Game.FRAME_WIDTH){
@@ -63,14 +74,6 @@ public class Ship {
             positionY += Game.FRAME_HEIGHT;
         } else if(positionY + currentImage.getCenterOfRotationY() >= Game.FRAME_HEIGHT){
             positionY -= Game.FRAME_HEIGHT;
-        }
-    }
-
-
-    private void rotate(int deltaAngle){
-        angle += deltaAngle;
-        for(Image image : images){
-            image.setRotation(angle);
         }
     }
 
