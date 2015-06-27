@@ -6,18 +6,17 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Timer;
 
 
 public class Play extends BasicGameState{
     private Image backgroundImage;
-    private Ship ship;
     private Timer timer = new Timer();
-    private List<Rock> rocks = new ArrayList<>(Rock.MAX_ROCKS);
-    private RockSpawner rockSpawner;
+    private GameInfo gameInfo;
+
+    private Ship ship;
+
 
     @Override
     public int getID(){
@@ -28,11 +27,11 @@ public class Play extends BasicGameState{
     public void init(GameContainer gc, StateBasedGame sbg){
         try{
             backgroundImage = new Image("res/images/nebula_blue.png");
-            ship = new Ship("res/images/double_ship.png");
-
-            rocks.add(new Rock());
-            rockSpawner = new RockSpawner(this);
-            timer.schedule(rockSpawner, new Date(), 1000);
+            gameInfo = new GameInfo();
+            gameInfo.createShip();
+            ship = gameInfo.getShip();
+            gameInfo.addRock(new Rock());  // removing this produces a bug. find out why.
+            timer.schedule(gameInfo.getRockSpawner(), new Date(), 1000);
         } catch(SlickException e){
             e.printStackTrace();
         }
@@ -44,8 +43,11 @@ public class Play extends BasicGameState{
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g){
         g.drawImage(backgroundImage, 0, 0);
         g.drawImage(ship.getCurrentImage(), ship.getPositionX(), ship.getPositionY());
-        for (Rock rock : rocks) {
+        for (Rock rock : gameInfo.getRocks()) {
             g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
+        }
+        for(Missile missile : gameInfo.getMissiles()){
+            g.drawImage(missile.getCurrentImage(), missile.getPositionX(), missile.getPositionY());
         }
     }
 
@@ -53,9 +55,16 @@ public class Play extends BasicGameState{
     public void update(GameContainer gc, StateBasedGame sbg, int delta){
         Input input = gc.getInput();
         ship.move(input);
-        for (Rock rock : rocks) {
+        for (Rock rock : gameInfo.getRocks()) {
             rock.move();
         }
+        for (Missile missile : gameInfo.getMissiles()){
+            missile.move();
+        }
+
+        // Shoot missiles
+        ship.shoot(input);
+
 
         // Collisions
         // TODO Kill the ship - add lives later.
@@ -67,10 +76,5 @@ public class Play extends BasicGameState{
 
     }
 
-
-    // GETTERS
-    public List<Rock> getRocks(){
-        return rocks;
-    }
 }
 

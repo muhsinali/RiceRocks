@@ -14,11 +14,11 @@ public class Rock {
     // Physics
     private int height;
     private int width;
-    private int positionX;
-    private int positionY;
-    private int velocity;
-    private int velocityX;
-    private int velocityY;
+    private float positionX;
+    private float positionY;
+    private float velocity;
+    private float velocityX;
+    private float velocityY;
     private int angle;
     private int angularVelocity;
     private Shape collider;
@@ -40,19 +40,21 @@ public class Rock {
         Random random = new Random();
 
         // Rotational motion
-        angularVelocity = random.nextInt(8) + 2;
+        int MIN_ANG_VEL = 2;
+        int MIN_VEL = 3;
+        angularVelocity = MIN_ANG_VEL + random.nextInt(8);
         angle = random.nextInt(360);
         currentImage.setRotation(angle);
 
         // Translational motion
         positionX = random.nextInt(Game.FRAME_WIDTH - width);
         positionY = random.nextInt(Game.FRAME_HEIGHT - height);
-        velocity = random.nextInt(4) + 3;
-        velocityX = (int) Math.round((velocity * Math.cos(Math.toRadians(angle))));
-        velocityY = (int) Math.round((velocity * Math.sin(Math.toRadians(angle))));
+        velocity = MIN_VEL + random.nextInt(4);
+        velocityX *= (float) Math.cos(Math.toRadians(angle));
+        velocityY *= (float) Math.sin(Math.toRadians(angle));
 
         // Collision detection
-        collider = new Circle(positionX + width / 2, positionY + height / 2, width / 2);
+        collider = new Circle(positionX + width / 2, positionY + height / 2, width / 2);    // todo centerX & centerY
     }
 
     public void move(){
@@ -89,11 +91,11 @@ public class Rock {
         return currentImage;
     }
 
-    public int getPositionX(){
+    public float getPositionX(){
         return positionX;
     }
 
-    public int getPositionY(){
+    public float getPositionY(){
         return positionY;
     }
 }

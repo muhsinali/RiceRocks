@@ -1,17 +1,17 @@
 import java.util.TimerTask;
 
 public class RockSpawner extends TimerTask {
-    private Play play;
+    private GameInfo gameInfo;
 
-    public RockSpawner(Play play){
-        this.play = play;
+    public RockSpawner(GameInfo gameInfo){
+        this.gameInfo = gameInfo;
     }
 
 
     @Override
     public void run(){
-        if(play.getRocks().size() < Rock.MAX_ROCKS){
-            play.getRocks().add(new Rock());
+        if(gameInfo.getRocks().size() < Rock.MAX_ROCKS){
+            gameInfo.getRocks().add(new Rock());
         }
     }
 }
