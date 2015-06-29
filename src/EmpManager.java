@@ -1,4 +1,4 @@
-public class MissileManager {
+public class EmpManager {
     // Might want to change the name of hte class
 
     // This class is used to check the lifetime of the missiles at specific time intervals using the ticker clases.

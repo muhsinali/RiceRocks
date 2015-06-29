@@ -3,10 +3,12 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Circle;
-import org.newdawn.slick.geom.Shape;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // todo This should have a singleton design pattern?
-public class Ship {
+public class Ship extends GameObject{
     private GameInfo gameInfo;
 
     public static final int HEIGHT, WIDTH;
@@ -16,50 +18,42 @@ public class Ship {
     private static final float ANGULAR_VELOCITY = 3;
     private static final float INITIAL_ANGLE = 270;
 
-    private float positionX, positionY;
-    private float velocityX, velocityY;
-    private float angle = INITIAL_ANGLE;  // in degrees & wrt vertical. Rotates clockwise as that's the convention of Image.setRotation()
+    private float angle = INITIAL_ANGLE;  // in degrees & wrt vertical. Rotates clockwise.
 
 
-    private static Image[] images;
-    private Image currentImage;
-
-    private Shape collider;
+    private static List<Image> images;
 
 
     static{
-        Image sprites = null;
+        Image sprites;
         try {
             sprites = new Image("res/images/double_ship.png");
-            loadImages(sprites);
-            // todo Figure out how to use streams to get all the widths from the images and then select the max WIDTH (& HEIGHT).
+            images = loadImages(sprites, 2, 1);
         }catch(SlickException e){
             e.printStackTrace();
         } finally{
-            if(sprites != null){
-                WIDTH = images[0].getWidth();
-                HEIGHT = images[0].getHeight();
-            } else {
-                WIDTH = 0;
-                HEIGHT = 0;
-            }
+            WIDTH = images.stream().mapToInt(Image::getWidth).max().orElse(0);
+            HEIGHT = images.stream().mapToInt(Image::getWidth).max().orElse(0);
         }
     }
 
     public Ship(GameInfo gameInfo){
         this.gameInfo = gameInfo;
-        currentImage = images[0];
+        currentImage = images.get(0);
         initialisePhysics();
         collider = new Circle(positionX + WIDTH / 2, positionY + HEIGHT / 2, WIDTH / 2);
     }
 
-    private static void loadImages(Image sprites){
-        SpriteSheet spriteSheet = new SpriteSheet(sprites, sprites.getWidth() / 2, sprites.getHeight());
-        images = new Image[2];
-        for(int i = 0; i < images.length; i++){
-            images[i] = spriteSheet.getSprite(i, 0);
-            images[i].setRotation(INITIAL_ANGLE);
+    private static List<Image> loadImages(Image sprites, int numImagesX, int numImagesY){
+        SpriteSheet spriteSheet = new SpriteSheet(sprites, sprites.getWidth() / numImagesX, sprites.getHeight() / numImagesY);
+        List<Image> images = new ArrayList<>(numImagesX * numImagesY);
+        for(int i = 0; i < numImagesX; i++){
+            for (int j = 0; j < numImagesY; j++) {
+                images.add(spriteSheet.getSprite(i, j));
+                images.get(i).setRotation(INITIAL_ANGLE);
+            }
         }
+        return images;
     }
 
     private void drag(){
@@ -67,8 +61,6 @@ public class Ship {
         velocityX *= DRAG;
         velocityY *= DRAG;
     }
-
-
 
     private void initialisePhysics(){
         positionX = Math.round(Game.FRAME_WIDTH / 2);
@@ -85,7 +77,7 @@ public class Ship {
         if (input.isKeyDown(Input.KEY_UP)) {
             accelerate();
         } else {
-            currentImage = images[0];
+            currentImage = images.get(0);
             drag();
         }
         updatePosition();
@@ -104,51 +96,18 @@ public class Ship {
             float centerX =  currentImage.getCenterOfRotationX();
             float centerY =  currentImage.getCenterOfRotationY();
 
-            // shift by 5 pixels to the left as the missile image is 10px wide & high
-            float shiftMissileX = Missile.WIDTH / 2;
-            float shiftMissileY = Missile.HEIGHT / 2;
-            float x = positionX + centerX - shiftMissileX + (float) ((centerX - shiftMissileX) * Math.cos(Math.toRadians(angle)));
-            float y = positionY + centerY - shiftMissileY + (float) ((centerY - shiftMissileY) * Math.sin(Math.toRadians(angle)));
-            gameInfo.getMissiles().add(new Missile(x, y, velocityX, velocityY, angle));
+            // shift a little bit to make the emp's image be centered correctly
+            float shiftEmpX = Emp.WIDTH / 2;
+            float shiftEmpY = Emp.HEIGHT / 2;
+            float x = positionX + centerX - shiftEmpX + (float) ((centerX - shiftEmpX) * Math.cos(Math.toRadians(angle)));
+            float y = positionY + centerY - shiftEmpY + (float) ((centerY - shiftEmpY) * Math.sin(Math.toRadians(angle)));
+            gameInfo.getEmps().add(new Emp(x, y, velocityX, velocityY, angle));
         }
     }
-
-    private void wrap(){
-        if(positionX + currentImage.getCenterOfRotationX() < 0){
-            positionX += Game.FRAME_WIDTH;
-        } else if (positionX + currentImage.getCenterOfRotationX() >= Game.FRAME_WIDTH){
-            positionX -= Game.FRAME_WIDTH;
-        }
-
-        if(positionY + currentImage.getCenterOfRotationY() < 0){
-            positionY += Game.FRAME_HEIGHT;
-        } else if (positionY + currentImage.getCenterOfRotationY() >= Game.FRAME_HEIGHT){
-            positionY -= Game.FRAME_HEIGHT;
-        }
-    }
-
-
-    // GETTERS
-    public Shape getCollider(){
-        return collider;
-    }
-
-    public Image getCurrentImage(){
-        return currentImage;
-    }
-
-    public float getPositionX(){
-        return positionX;
-    }
-
-    public float getPositionY(){
-        return positionY;
-    }
-
 
     // SETTERS
     private void accelerate(){
-        currentImage = images[1];
+        currentImage = images.get(1);
         // why does int -= double not require casting but just - does?
         if(Math.pow(velocityX, 2) + Math.pow(velocityY, 2) < Math.pow(8, 2)) {
             velocityX += (float) (ACCELERATION * Math.cos(Math.toRadians(angle)));

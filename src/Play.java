@@ -12,14 +12,12 @@ import java.util.Timer;
 
 
 public class Play extends BasicGameState{
-    private List<Missile> missiles;
+    private List<Emp> emps;
     private List<Rock> rocks;
     private Ship ship;
 
     private Image backgroundImage;
     private Timer timer = new Timer();
-
-    int i;
 
 
     @Override
@@ -35,7 +33,7 @@ public class Play extends BasicGameState{
             gameInfo.createShip();
             ship = gameInfo.getShip();
             rocks = gameInfo.getRocks();
-            missiles = gameInfo.getMissiles();
+            emps = gameInfo.getEmps();
             rocks.add(new Rock());  // removing this produces a bug. find out why.
             timer.schedule(gameInfo.getRockSpawner(), new Date(), 1000);
         } catch(SlickException e){
@@ -52,9 +50,9 @@ public class Play extends BasicGameState{
             g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
             g.draw(rock.getCollider());
         }
-        for(Missile missile : missiles){
-            g.drawImage(missile.getCurrentImage(), missile.getPositionX(), missile.getPositionY());
-            g.draw(missile.getCollider());
+        for(Emp emp : emps){
+            g.drawImage(emp.getCurrentImage(), emp.getPositionX(), emp.getPositionY());
+            g.draw(emp.getCollider());
         }
     }
 
@@ -62,14 +60,10 @@ public class Play extends BasicGameState{
     public void update(GameContainer gc, StateBasedGame sbg, int delta){
         Input input = gc.getInput();
         ship.move(input);
-        for (Rock rock : rocks) {
-            rock.move();
-        }
-        for (Missile missile : missiles){
-            missile.move();
-        }
+        rocks.stream().forEach(Rock::move);
+        emps.stream().forEach(Emp::move);
 
-        // Shoot missiles
+        // Shoot emps
         ship.shoot(input);
 
 

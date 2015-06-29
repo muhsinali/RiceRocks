@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameInfo {
-    private List<Missile> missiles = new ArrayList<>();
+    private List<Emp> emps = new ArrayList<>();
     private RockSpawner rockSpawner;
     private List<Rock> rocks = new ArrayList<>(Rock.MAX_ROCKS);
     private Ship ship;
@@ -17,8 +17,8 @@ public class GameInfo {
     }
 
     // GETTERS
-    public List<Missile> getMissiles(){
-        return missiles;
+    public List<Emp> getEmps(){
+        return emps;
     }
 
     public List<Rock> getRocks(){
