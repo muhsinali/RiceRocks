@@ -7,15 +7,19 @@ import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 
 
 public class Play extends BasicGameState{
+    private List<Missile> missiles;
+    private List<Rock> rocks;
+    private Ship ship;
+
     private Image backgroundImage;
     private Timer timer = new Timer();
-    private GameInfo gameInfo;
 
-    private Ship ship;
+    int i;
 
 
     @Override
@@ -27,27 +31,30 @@ public class Play extends BasicGameState{
     public void init(GameContainer gc, StateBasedGame sbg){
         try{
             backgroundImage = new Image("res/images/nebula_blue.png");
-            gameInfo = new GameInfo();
+            GameInfo gameInfo = new GameInfo();
             gameInfo.createShip();
             ship = gameInfo.getShip();
-            gameInfo.addRock(new Rock());  // removing this produces a bug. find out why.
+            rocks = gameInfo.getRocks();
+            missiles = gameInfo.getMissiles();
+            rocks.add(new Rock());  // removing this produces a bug. find out why.
             timer.schedule(gameInfo.getRockSpawner(), new Date(), 1000);
         } catch(SlickException e){
             e.printStackTrace();
         }
     }
 
-
-
     @Override
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g){
         g.drawImage(backgroundImage, 0, 0);
         g.drawImage(ship.getCurrentImage(), ship.getPositionX(), ship.getPositionY());
-        for (Rock rock : gameInfo.getRocks()) {
+        g.draw(ship.getCollider());
+        for (Rock rock : rocks) {
             g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
+            g.draw(rock.getCollider());
         }
-        for(Missile missile : gameInfo.getMissiles()){
+        for(Missile missile : missiles){
             g.drawImage(missile.getCurrentImage(), missile.getPositionX(), missile.getPositionY());
+            g.draw(missile.getCollider());
         }
     }
 
@@ -55,10 +62,10 @@ public class Play extends BasicGameState{
     public void update(GameContainer gc, StateBasedGame sbg, int delta){
         Input input = gc.getInput();
         ship.move(input);
-        for (Rock rock : gameInfo.getRocks()) {
+        for (Rock rock : rocks) {
             rock.move();
         }
-        for (Missile missile : gameInfo.getMissiles()){
+        for (Missile missile : missiles){
             missile.move();
         }
 
@@ -68,9 +75,10 @@ public class Play extends BasicGameState{
 
         // Collisions
         // TODO Kill the ship - add lives later.
+
 //        for(Rock rock : rocks) {
 //            if (ship.getCollider().intersects(rock.getCollider())) {
-//                System.out.println("Ow!");
+//                System.out.println("Ow!" + "\t" + ++i);
 //            }
 //        }
 

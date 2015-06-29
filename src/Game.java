@@ -6,6 +6,7 @@ public class Game extends StateBasedGame{
     public static final int PLAY = 0;
     public static final int GAME_WON = 1;
     public static final int GAME_OVER = 2;
+    // todo use enums
 
     public static final int FRAME_WIDTH = 800;
     public static final int FRAME_HEIGHT = 600;

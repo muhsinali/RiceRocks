@@ -12,14 +12,6 @@ public class GameInfo {
         rockSpawner = new RockSpawner(this);
     }
 
-    public void addRock(Rock rock){
-        rocks.add(rock);
-    }
-
-    public void addMissile(Missile missile){
-        missiles.add(missile);
-    }
-
     public void createShip(){
         ship = new Ship(this);
     }
@@ -28,6 +20,7 @@ public class GameInfo {
     public List<Missile> getMissiles(){
         return missiles;
     }
+
     public List<Rock> getRocks(){
         return rocks;
     }

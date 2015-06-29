@@ -7,32 +7,41 @@ import java.util.Random;
 
 
 public class Rock {
-    public static int MAX_ROCKS = 2;
+    public static final int MAX_ROCKS = 2;
+    public static final int HEIGHT, WIDTH;
 
-    private Image currentImage;
+    private static Image currentImage;
+
+    static{
+        try {
+            currentImage = new Image("res/images/asteroid_blue.png");
+        }catch (SlickException e){
+            e.printStackTrace();
+        } finally {
+            if(currentImage != null){
+                WIDTH = currentImage.getWidth();
+                HEIGHT = currentImage.getHeight();
+            } else {
+                WIDTH = 0;
+                HEIGHT = 0;
+            }
+        }
+    }
+
 
     // Physics
-    private int height;
-    private int width;
     private float positionX;
     private float positionY;
     private float velocity;
-    private float velocityX;
+    private float velocityX;    // todo find out how to make these blank instance final variables
     private float velocityY;
-    private int angle;
-    private int angularVelocity;
+    private float angle;
+    private float angularVelocity;
     private Shape collider;
 
 
     public Rock(){
-        try{
-            currentImage = new Image("res/images/asteroid_blue.png");
-            width = currentImage.getWidth();
-            height = currentImage.getHeight();
-            initialisePhysics();
-        }catch(SlickException e){
-            e.printStackTrace();
-        }
+        initialisePhysics();
     }
 
     private void initialisePhysics(){
@@ -40,21 +49,21 @@ public class Rock {
         Random random = new Random();
 
         // Rotational motion
-        int MIN_ANG_VEL = 2;
-        int MIN_VEL = 3;
-        angularVelocity = MIN_ANG_VEL + random.nextInt(8);
-        angle = random.nextInt(360);
+        final int MIN_ANG_VEL = 1;
+        final int MIN_VEL = 3;
+        angularVelocity = MIN_ANG_VEL + 4 * random.nextFloat();
+        angle = 360 * random.nextFloat();
         currentImage.setRotation(angle);
 
         // Translational motion
-        positionX = random.nextInt(Game.FRAME_WIDTH - width);
-        positionY = random.nextInt(Game.FRAME_HEIGHT - height);
-        velocity = MIN_VEL + random.nextInt(4);
-        velocityX *= (float) Math.cos(Math.toRadians(angle));
-        velocityY *= (float) Math.sin(Math.toRadians(angle));
+        positionX = (Game.FRAME_WIDTH - WIDTH) * random.nextFloat();
+        positionY = (Game.FRAME_HEIGHT - HEIGHT) * random.nextFloat();
+        velocity = MIN_VEL + 4 * random.nextFloat();
+        velocityX = (float) (velocity * Math.cos(Math.toRadians(angle)));
+        velocityY = (float) (velocity * Math.sin(Math.toRadians(angle)));
 
         // Collision detection
-        collider = new Circle(positionX + width / 2, positionY + height / 2, width / 2);    // todo centerX & centerY
+        collider = new Circle(positionX + WIDTH / 2, positionY + HEIGHT / 2, WIDTH / 2);
     }
 
     public void move(){
@@ -62,8 +71,7 @@ public class Rock {
         positionX += velocityX;
         positionY += velocityY;
         wrap();
-        collider.setCenterX(positionX);
-        collider.setCenterY(positionY);
+        collider.setLocation(positionX, positionY);
     }
 
 

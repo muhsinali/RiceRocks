@@ -5,58 +5,72 @@ import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Shape;
 
-// This should have a singleton design pattern?
+// todo This should have a singleton design pattern?
 public class Ship {
     private GameInfo gameInfo;
 
-    private int height;
-    private int width;
+    public static final int HEIGHT, WIDTH;
 
     // Physics
+    private static final float ACCELERATION = 0.08f;
+    private static final float ANGULAR_VELOCITY = 3;
+    private static final float INITIAL_ANGLE = 270;
+
     private float positionX, positionY;
     private float velocityX, velocityY;
-    private float ACCELERATION = 8;
-    private int initialAngle = 270;
-    private int ANGULAR_VELOCITY = 3;
-    private int angle = initialAngle;  // in degrees & wrt vertical. Rotates clockwise as that's the convention of Image.setRotation()
+    private float angle = INITIAL_ANGLE;  // in degrees & wrt vertical. Rotates clockwise as that's the convention of Image.setRotation()
 
-    private Image[] images;
+
+    private static Image[] images;
     private Image currentImage;
 
     private Shape collider;
 
-    public Ship(GameInfo gameInfo){
+
+    static{
+        Image sprites = null;
         try {
-            this.gameInfo = gameInfo;
-            loadImages(new Image("res/images/double_ship.png"));
-            initialisePhysics();
-            collider = new Circle(positionX + width / 2, positionY + height / 2, width / 2);
-        } catch(SlickException e){
+            sprites = new Image("res/images/double_ship.png");
+            loadImages(sprites);
+            // todo Figure out how to use streams to get all the widths from the images and then select the max WIDTH (& HEIGHT).
+        }catch(SlickException e){
             e.printStackTrace();
+        } finally{
+            if(sprites != null){
+                WIDTH = images[0].getWidth();
+                HEIGHT = images[0].getHeight();
+            } else {
+                WIDTH = 0;
+                HEIGHT = 0;
+            }
+        }
+    }
+
+    public Ship(GameInfo gameInfo){
+        this.gameInfo = gameInfo;
+        currentImage = images[0];
+        initialisePhysics();
+        collider = new Circle(positionX + WIDTH / 2, positionY + HEIGHT / 2, WIDTH / 2);
+    }
+
+    private static void loadImages(Image sprites){
+        SpriteSheet spriteSheet = new SpriteSheet(sprites, sprites.getWidth() / 2, sprites.getHeight());
+        images = new Image[2];
+        for(int i = 0; i < images.length; i++){
+            images[i] = spriteSheet.getSprite(i, 0);
+            images[i].setRotation(INITIAL_ANGLE);
         }
     }
 
     private void drag(){
-        currentImage = images[0];
         float DRAG = 0.99f;
         velocityX *= DRAG;
         velocityY *= DRAG;
     }
 
-    private void loadImages(Image sprites){
-        SpriteSheet spriteSheet = new SpriteSheet(sprites, sprites.getWidth() / 2, sprites.getHeight());
-        images = new Image[2];
-        for(int i = 0; i < images.length; i++){
-            images[i] = spriteSheet.getSprite(i, 0);
-            images[i].setRotation(initialAngle);
-        }
-        currentImage = images[0];
-    }
+
 
     private void initialisePhysics(){
-        // todo Figure out how to use streams to get all the widths from the images and then select the max width (& height).
-        width = images[0].getWidth();
-        height = images[0].getHeight();
         positionX = Math.round(Game.FRAME_WIDTH / 2);
         positionY = Math.round(Game.FRAME_HEIGHT / 2);
     }
@@ -71,12 +85,13 @@ public class Ship {
         if (input.isKeyDown(Input.KEY_UP)) {
             accelerate();
         } else {
+            currentImage = images[0];
             drag();
         }
         updatePosition();
     }
 
-    private void rotate(int deltaAngle){
+    private void rotate(float deltaAngle){
         angle += deltaAngle;
         angle %= 360;
         for(Image image : images){
@@ -90,11 +105,11 @@ public class Ship {
             float centerY =  currentImage.getCenterOfRotationY();
 
             // shift by 5 pixels to the left as the missile image is 10px wide & high
-            float shiftMissileX = Missile.CENTER_X;
-            float shiftMissileY = Missile.CENTER_Y;
+            float shiftMissileX = Missile.WIDTH / 2;
+            float shiftMissileY = Missile.HEIGHT / 2;
             float x = positionX + centerX - shiftMissileX + (float) ((centerX - shiftMissileX) * Math.cos(Math.toRadians(angle)));
             float y = positionY + centerY - shiftMissileY + (float) ((centerY - shiftMissileY) * Math.sin(Math.toRadians(angle)));
-            gameInfo.addMissile(new Missile(x, y, angle));
+            gameInfo.getMissiles().add(new Missile(x, y, velocityX, velocityY, angle));
         }
     }
 
@@ -132,20 +147,27 @@ public class Ship {
 
 
     // SETTERS
-    // Figure out why these physics equations work properly
-    // why does int -= double work but just - does not?
     private void accelerate(){
         currentImage = images[1];
-        // add acceleration and use an if statement introduce a kind of drag function to it?
-        velocityX = (float) (ACCELERATION * Math.cos(Math.toRadians(angle)));
-        velocityY = (float) (ACCELERATION * Math.sin(Math.toRadians(angle)));
+        // why does int -= double not require casting but just - does?
+        if(Math.pow(velocityX, 2) + Math.pow(velocityY, 2) < Math.pow(8, 2)) {
+            velocityX += (float) (ACCELERATION * Math.cos(Math.toRadians(angle)));
+            velocityY += (float) (ACCELERATION * Math.sin(Math.toRadians(angle)));
+        } else {
+            // For when ship has reached max velocity. This block allows the ship to change direction whilst keeping its
+            // speed constant. How? When the ship changes direction at max vel, the force & vel vectors are no longer
+            // positioned at the same angle. Therefore, the acceleration relative to the vel needs to be added, causing
+            // the ship to change direction.
+            float velocityAngle = (float) Math.toDegrees(Math.atan2(velocityY, velocityX));
+            velocityX += (float) (ACCELERATION * (Math.cos(Math.toRadians(angle)) - Math.cos(Math.toRadians(velocityAngle))));
+            velocityY += (float) (ACCELERATION * (Math.sin(Math.toRadians(angle)) - Math.sin(Math.toRadians(velocityAngle))));
+        }
     }
 
     public void updatePosition(){
-        positionX += velocityX;     // VELOCITY was 5
+        positionX += velocityX;
         positionY += velocityY;
         wrap();
-        collider.setCenterX(positionX);
-        collider.setCenterY(positionY);
+        collider.setLocation(positionX, positionY);
     }
 }
