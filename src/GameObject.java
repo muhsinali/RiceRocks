@@ -1,7 +1,7 @@
 import org.newdawn.slick.Image;
 import org.newdawn.slick.geom.Shape;
 
-public abstract class GameObject {
+public class GameObject {
     protected float positionX, positionY;
     protected float velocityX, velocityY;
     protected Shape collider;
@@ -9,7 +9,7 @@ public abstract class GameObject {
 
 
     public void wrap(){
-        if(positionX + currentImage.getCenterOfRotationX() < 0){    // What is the centerOfRotationX exactly?
+        if(positionX + currentImage.getCenterOfRotationX() < 0){
             positionX += Game.FRAME_WIDTH;
         } else if (positionX + currentImage.getCenterOfRotationX() >= Game.FRAME_WIDTH){
             positionX -= Game.FRAME_WIDTH;

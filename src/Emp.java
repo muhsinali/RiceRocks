@@ -3,6 +3,8 @@ import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.SlickException;
 
 public class Emp extends GameObject{
+    // STATIC VARS
+    public static float MAX_LIFETIME = 600;
     private static Image image = null;
     public static final int HEIGHT, WIDTH;
 
@@ -22,10 +24,14 @@ public class Emp extends GameObject{
         }
     }
 
+    // INSTANCE VARS
+    private int lifetime;
+
+
     public Emp(float positionX, float positionY, float velocityX, float velocityY, float angle) {
         currentImage = image;
         // Galilean transformations
-        float VELOCITY = 3;
+        float VELOCITY = 8;
         this.positionX = positionX;
         this.positionY = positionY;
         this.velocityX = velocityX + Math.round(VELOCITY * Math.cos(Math.toRadians(angle)));
@@ -33,10 +39,19 @@ public class Emp extends GameObject{
         collider = new Circle(positionX + WIDTH / 2, positionY + HEIGHT / 2, currentImage.getWidth() / 2.0f);
     }
 
+    public void incrementLifetime(int timeStep){
+        lifetime += timeStep;
+    }
+
     public void move(){
         positionX += velocityX;
         positionY += velocityY;
         wrap();
         collider.setLocation(positionX, positionY);
+    }
+
+    // GETTERS
+    public int getLifetime(){
+        return lifetime;
     }
 }

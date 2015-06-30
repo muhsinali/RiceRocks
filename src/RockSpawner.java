@@ -1,17 +1,19 @@
+import java.util.List;
 import java.util.TimerTask;
 
 public class RockSpawner extends TimerTask {
-    private GameInfo gameInfo;
+    public static final int TIME_STEP = 2000;
+    private List<Rock> rocks;
 
-    public RockSpawner(GameInfo gameInfo){
-        this.gameInfo = gameInfo;
+    public RockSpawner(List<Rock> rocks){
+        this.rocks = rocks;
     }
 
 
     @Override
     public void run(){
-        if(gameInfo.getRocks().size() < Rock.MAX_ROCKS){
-            gameInfo.getRocks().add(new Rock());
+        if(rocks.size() < Rock.MAX_ROCKS){
+            rocks.add(new Rock());
         }
     }
 }

@@ -6,12 +6,15 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
+
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 
 
 public class Play extends BasicGameState{
+    private GameInfo gameInfo;
     private List<Emp> emps;
     private List<Rock> rocks;
     private Ship ship;
@@ -22,20 +25,23 @@ public class Play extends BasicGameState{
 
     @Override
     public int getID(){
-        return Game.PLAY;
+        return GameState.PLAY.getID();
     }
 
     @Override
     public void init(GameContainer gc, StateBasedGame sbg){
         try{
             backgroundImage = new Image("res/images/nebula_blue.png");
-            GameInfo gameInfo = new GameInfo();
-            gameInfo.createShip();
+            gameInfo = new GameInfo();
             ship = gameInfo.getShip();
             rocks = gameInfo.getRocks();
             emps = gameInfo.getEmps();
-            rocks.add(new Rock());  // removing this produces a bug. find out why.
-            timer.schedule(gameInfo.getRockSpawner(), new Date(), 1000);
+            rocks.add(new Rock());  // todo removing this produces a bug. find out why.
+
+            Date date = new Date();
+            timer.schedule(gameInfo.getEmpManager(), date, EmpManager.TIME_STEP);
+            timer.schedule(gameInfo.getRockSpawner(), date, RockSpawner.TIME_STEP);
+            timer.schedule(gameInfo.getShipSpawner(), date, ShipSpawner.TIME_STEP);
         } catch(SlickException e){
             e.printStackTrace();
         }
@@ -44,16 +50,23 @@ public class Play extends BasicGameState{
     @Override
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g){
         g.drawImage(backgroundImage, 0, 0);
-        g.drawImage(ship.getCurrentImage(), ship.getPositionX(), ship.getPositionY());
-        g.draw(ship.getCollider());
+        g.drawImage(ship.getCurrentImage(), ship.getPositionX(), ship.getPositionY(), ship.getColor());
+        //g.draw(ship.getCollider());
+
         for (Rock rock : rocks) {
             g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
-            g.draw(rock.getCollider());
+            //g.draw(rock.getCollider());
         }
-        for(Emp emp : emps){
+        for (Emp emp : emps) {
             g.drawImage(emp.getCurrentImage(), emp.getPositionX(), emp.getPositionY());
-            g.draw(emp.getCollider());
+            //g.draw(emp.getCollider());
         }
+
+        final int HUD_RIGHT_X = 680;
+        final int HUD_RIGHT_Y = 15;
+        final int LINE_SPACING = 20;
+        g.drawString("Lives: " + gameInfo.getLivesRemaining(), HUD_RIGHT_X, HUD_RIGHT_Y);
+        g.drawString("Score: " + gameInfo.getScore(), HUD_RIGHT_X, HUD_RIGHT_Y + LINE_SPACING);
     }
 
     @Override
@@ -68,13 +81,35 @@ public class Play extends BasicGameState{
 
 
         // Collisions
-        // TODO Kill the ship - add lives later.
+        Iterator<Rock> rockIterator = rocks.iterator();
+        while(rockIterator.hasNext()) {
+            Rock rock = rockIterator.next();
 
-//        for(Rock rock : rocks) {
-//            if (ship.getCollider().intersects(rock.getCollider())) {
-//                System.out.println("Ow!" + "\t" + ++i);
-//            }
-//        }
+            if(ship.getCollider().intersects(rock.getCollider()) && !ship.isRespawning()){
+                rockIterator.remove();
+                gameInfo.deductLife();
+                if(gameInfo.getLivesRemaining() == 0){
+                    sbg.enterState(GameState.GAME_LOST.getID());
+                    // todo find out how to leave this state
+                }
+                ship.setPosition(Ship.INITIAL_POS_X, Ship.INITIAL_POS_Y);
+                ship.setVelocity(0, 0);
+                ship.setOrientation(Ship.INITIAL_ANGLE);
+                ship.setLifetime(0);
+                continue;
+            }
+
+            Iterator<Emp> empIterator = emps.iterator();
+            while (empIterator.hasNext()) {
+                Emp emp = empIterator.next();
+                if (emp.getCollider().intersects(rock.getCollider())) {
+                    empIterator.remove();
+                    rockIterator.remove();
+                    gameInfo.setScore(gameInfo.getScore() + Rock.POINTS);
+                    break;
+                }
+            }
+        }
 
     }
 
