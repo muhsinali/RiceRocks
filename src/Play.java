@@ -51,15 +51,16 @@ public class Play extends BasicGameState{
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g){
         g.drawImage(backgroundImage, 0, 0);
         g.drawImage(ship.getCurrentImage(), ship.getPositionX(), ship.getPositionY(), ship.getColor());
-        //g.draw(ship.getCollider());
 
         for (Rock rock : rocks) {
-            g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
-            //g.draw(rock.getCollider());
+            if(rock.hasExplosionBegun()){
+                g.drawAnimation(rock.getExplosion(), rock.getPositionX(), rock.getPositionY());
+            }else {
+                g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
+            }
         }
         for (Emp emp : emps) {
             g.drawImage(emp.getCurrentImage(), emp.getPositionX(), emp.getPositionY());
-            //g.draw(emp.getCollider());
         }
 
         final int HUD_RIGHT_X = 680;
@@ -84,27 +85,30 @@ public class Play extends BasicGameState{
         Iterator<Rock> rockIterator = rocks.iterator();
         while(rockIterator.hasNext()) {
             Rock rock = rockIterator.next();
+            if(rock.getExplosion().isStopped()){
+                rockIterator.remove();
+            }
 
             if(ship.getCollider().intersects(rock.getCollider()) && !ship.isRespawning()){
-                rockIterator.remove();
-                gameInfo.deductLife();
-                if(gameInfo.getLivesRemaining() == 0){
-                    sbg.enterState(GameState.GAME_LOST.getID());
-                    // todo find out how to leave this state
-                }
-                ship.setPosition(Ship.INITIAL_POS_X, Ship.INITIAL_POS_Y);
-                ship.setVelocity(0, 0);
-                ship.setOrientation(Ship.INITIAL_ANGLE);
-                ship.setLifetime(0);
+//                rockIterator.remove();
+//                gameInfo.deductLife();
+//                if(gameInfo.getLivesRemaining() == 0){
+//                    sbg.enterState(GameState.GAME_LOST.getID());
+//                    // todo find out how to leave this state
+//                }
+//                ship.setPosition(Ship.INITIAL_POS_X, Ship.INITIAL_POS_Y);
+//                ship.setVelocity(0, 0);
+//                ship.setOrientation(Ship.INITIAL_ANGLE);
+//                ship.setLifetime(0);
                 continue;
             }
 
             Iterator<Emp> empIterator = emps.iterator();
             while (empIterator.hasNext()) {
                 Emp emp = empIterator.next();
-                if (emp.getCollider().intersects(rock.getCollider())) {
+                if (emp.getCollider().intersects(rock.getCollider()) && !rock.hasExplosionBegun()) {
+                    rock.beginExplosion();
                     empIterator.remove();
-                    rockIterator.remove();
                     gameInfo.setScore(gameInfo.getScore() + Rock.POINTS);
                     break;
                 }
@@ -112,6 +116,5 @@ public class Play extends BasicGameState{
         }
 
     }
-
 }
 

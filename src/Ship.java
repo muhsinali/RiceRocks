@@ -5,14 +5,22 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Circle;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.media.AudioClip;
+
+
 
 public class Ship extends GameObject{
     private GameInfo gameInfo;
 
     public static final int HEIGHT, WIDTH;
     private static List<Image> images;
+
+    // Sounds
+    private AudioClip thrustSound;
+    private AudioClip shootEmp;
 
 
     // Physics
@@ -24,7 +32,7 @@ public class Ship extends GameObject{
 
     private float angle = INITIAL_ANGLE;  // in degrees & wrt vertical. Rotates clockwise.
 
-    // Alpha for colour. Used to adjust opacity of ship.
+    // Alpha variable is for Color. Used to adjust opacity of ship.
     public static final float HIGH_ALPHA = 1;
     public static final float LOW_ALPHA = 0.6f;
     private float alpha = 1;
@@ -33,10 +41,8 @@ public class Ship extends GameObject{
     private int lifetime;
 
     static{
-        Image sprites;
         try {
-            sprites = new Image("res/images/double_ship.png");
-            images = loadImages(sprites, 2, 1);
+            images = loadImages(new Image("res/images/double_ship.png"), 2, 1);
         }catch(SlickException e){
             e.printStackTrace();
         } finally{
@@ -51,9 +57,8 @@ public class Ship extends GameObject{
         this.gameInfo = gameInfo;
         currentImage = images.get(0);
         initialisePhysics();
-        collider = new Circle(positionX + WIDTH / 2, positionY + HEIGHT / 2, WIDTH / 2);
+        loadSounds();
     }
-
 
 
     private void accelerate(){
@@ -73,6 +78,22 @@ public class Ship extends GameObject{
         }
     }
 
+    private void drag(){
+        float DRAG = 0.99f;
+        velocityX *= DRAG;
+        velocityY *= DRAG;
+    }
+
+    private void initialisePhysics(){
+        positionX = INITIAL_POS_X;
+        positionY = INITIAL_POS_Y;
+        // Collider is used for collision detection
+        collider = new Circle(positionX + WIDTH / 2, positionY + HEIGHT / 2, WIDTH / 2);
+    }
+
+    public boolean isRespawning(){
+        return lifetime <= RESPAWN_PERIOD;
+    }
 
     private static List<Image> loadImages(Image sprites, int numImagesX, int numImagesY){
         SpriteSheet spriteSheet = new SpriteSheet(sprites, sprites.getWidth() / numImagesX, sprites.getHeight() / numImagesY);
@@ -86,19 +107,11 @@ public class Ship extends GameObject{
         return images;
     }
 
-    private void drag(){
-        float DRAG = 0.99f;
-        velocityX *= DRAG;
-        velocityY *= DRAG;
-    }
-
-    private void initialisePhysics(){
-        positionX = INITIAL_POS_X;
-        positionY = INITIAL_POS_Y;
-    }
-
-    public boolean isRespawning(){
-        return lifetime <= RESPAWN_PERIOD;
+    private void loadSounds(){
+            thrustSound = new AudioClip(Paths.get("res/sounds/thrust.mp3").toUri().toString());
+            String cools = Paths.get("res/sounds/emp.mp3").toUri().toString();      // todo cools
+            System.out.println(cools);
+            shootEmp = new AudioClip(cools);
     }
 
     public void move(Input input){
@@ -110,32 +123,43 @@ public class Ship extends GameObject{
         }
         if (input.isKeyDown(Input.KEY_UP)) {
             accelerate();
+            playThrustSound();
         } else {
             currentImage = images.get(0);
             drag();
+            stopThrustSound();
         }
         setPosition(positionX + velocityX, positionY + velocityY);
     }
 
+    private void playThrustSound(){
+        if(!thrustSound.isPlaying()) {
+            thrustSound.play(0.4);
+        }
+    }
 
     public void shoot(Input input){
         if(input.isKeyPressed(Input.KEY_SPACE)){
-            float centerX =  currentImage.getCenterOfRotationX();
-            float centerY =  currentImage.getCenterOfRotationY();
+            // Ensures that the emp is centered correctly so that it looks like it comes out of the ship's canon
+            float alignEmpX = currentImage.getCenterOfRotationX() - Emp.WIDTH / 2;
+            float alignEmpY = currentImage.getCenterOfRotationY() - Emp.HEIGHT / 2;
+            float empX = positionX + alignEmpX + (float) (alignEmpX * Math.cos(Math.toRadians(angle)));
+            float empY = positionY + alignEmpY + (float) (alignEmpY * Math.sin(Math.toRadians(angle)));
+            gameInfo.getEmps().add(new Emp(empX, empY, velocityX, velocityY, angle));
+            shootEmp.play();
+        }
+    }
 
-            // shift a little bit to make the emp's image be centered correctly
-            float shiftEmpX = Emp.WIDTH / 2;
-            float shiftEmpY = Emp.HEIGHT / 2;
-            float x = positionX + centerX - shiftEmpX + (float) ((centerX - shiftEmpX) * Math.cos(Math.toRadians(angle)));
-            float y = positionY + centerY - shiftEmpY + (float) ((centerY - shiftEmpY) * Math.sin(Math.toRadians(angle)));
-            gameInfo.getEmps().add(new Emp(x, y, velocityX, velocityY, angle));
+    private void stopThrustSound(){
+        if(thrustSound.isPlaying()){
+            thrustSound.stop();
         }
     }
 
 
     // GETTERS
     public Color getColor(){
-        return new Color(255, 255, 255, alpha);
+        return new Color(255, 255, 255, alpha);     // todo see if you need to always return a new Color obj (alpha is changing)
     }
 
     public int getLifetime(){
@@ -161,20 +185,9 @@ public class Ship extends GameObject{
 
     public void setOrientation(float value){
         angle = value;
-
-        if(angle >= 360){
-            angle -= 360;
-        } else if (angle < 0){
-            angle += 360;
-        }
-
+        angle %= 360;
         for(Image image : images){
             image.setRotation(angle);
         }
-    }
-
-    public void setVelocity(float vX, float vY){
-        velocityX = vX;
-        velocityY = vY;
     }
 }
