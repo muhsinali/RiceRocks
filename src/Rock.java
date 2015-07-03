@@ -1,11 +1,10 @@
-import javafx.scene.media.AudioClip;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.Sound;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.SlickException;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -50,7 +49,7 @@ public class Rock extends GameObject {
         velocityX = 0;
         velocityY = 0;
         explode = true;
-        playExplosionSound("res/sounds/explosion.mp3");
+        playExplosionSound("res/sounds/explosion.ogg");
     }
 
     public boolean hasExplosionBegun(){
@@ -101,8 +100,12 @@ public class Rock extends GameObject {
     }
 
     private void playExplosionSound(String sound){
-        AudioClip explosionSound = new AudioClip(Paths.get(sound).toUri().toString());
-        explosionSound.play(0.6);
+        try {
+            Sound explosionSound = new Sound(sound);
+            explosionSound.play(1, 0.6f);
+        }catch (SlickException e){
+            e.printStackTrace();
+        }
     }
 
     // GETTERS

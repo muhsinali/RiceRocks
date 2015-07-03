@@ -20,8 +20,54 @@ public class Play extends BasicGameState{
     private Ship ship;
 
     private Image backgroundImage;
+    private Debris debris;
     private Timer timer = new Timer();
 
+    private void drawBackground(Graphics g){
+        g.drawImage(backgroundImage, 0, 0);
+    }
+
+    private void drawDebris(Graphics g){
+        g.drawImage(debris.getImage(),
+                0, 0,
+                debris.getPositionX(), Game.FRAME_HEIGHT,
+                debris.getWidth() - debris.getPositionX(), 0,
+                debris.getWidth(), Game.FRAME_HEIGHT);
+
+        g.drawImage(debris.getImage(),
+                debris.getPositionX(), 0,
+                Game.FRAME_WIDTH, Game.FRAME_HEIGHT,
+                0, 0,
+                Game.FRAME_WIDTH - debris.getPositionX(), Game.FRAME_HEIGHT);
+    }
+
+    private void drawEmps(Graphics g){
+        for (Emp emp : emps) {
+            g.drawImage(emp.getCurrentImage(), emp.getPositionX(), emp.getPositionY());
+        }
+    }
+
+    private void drawHUD(Graphics g){
+        final int HUD_RIGHT_X = Game.FRAME_WIDTH - 120;
+        final int HUD_RIGHT_Y = 15;
+        final int LINE_SPACING = 20;
+        g.drawString("Lives: " + gameInfo.getLivesRemaining(), HUD_RIGHT_X, HUD_RIGHT_Y);
+        g.drawString("Score: " + gameInfo.getScore(), HUD_RIGHT_X, HUD_RIGHT_Y + LINE_SPACING);
+    }
+
+    private void drawRocks(Graphics g){
+        for (Rock rock : rocks) {
+            if(rock.hasExplosionBegun()){
+                g.drawAnimation(rock.getExplosion(), rock.getPositionX(), rock.getPositionY());
+            }else {
+                g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
+            }
+        }
+    }
+
+    private void drawShip(Graphics g){
+        g.drawImage(ship.getCurrentImage(), ship.getPositionX(), ship.getPositionY(), ship.getColor());
+    }
 
     @Override
     public int getID(){
@@ -32,6 +78,7 @@ public class Play extends BasicGameState{
     public void init(GameContainer gc, StateBasedGame sbg){
         try{
             backgroundImage = new Image("res/images/nebula_blue.png");
+            debris = new Debris("res/images/debris2_blue.png", Game.FRAME_WIDTH, Game.FRAME_HEIGHT);
             gameInfo = new GameInfo();
             ship = gameInfo.getShip();
             rocks = gameInfo.getRocks();
@@ -47,32 +94,23 @@ public class Play extends BasicGameState{
         }
     }
 
+
+
     @Override
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g){
-        g.drawImage(backgroundImage, 0, 0);
-        g.drawImage(ship.getCurrentImage(), ship.getPositionX(), ship.getPositionY(), ship.getColor());
-
-        for (Rock rock : rocks) {
-            if(rock.hasExplosionBegun()){
-                g.drawAnimation(rock.getExplosion(), rock.getPositionX(), rock.getPositionY());
-            }else {
-                g.drawImage(rock.getCurrentImage(), rock.getPositionX(), rock.getPositionY());
-            }
-        }
-        for (Emp emp : emps) {
-            g.drawImage(emp.getCurrentImage(), emp.getPositionX(), emp.getPositionY());
-        }
-
-        final int HUD_RIGHT_X = 680;
-        final int HUD_RIGHT_Y = 15;
-        final int LINE_SPACING = 20;
-        g.drawString("Lives: " + gameInfo.getLivesRemaining(), HUD_RIGHT_X, HUD_RIGHT_Y);
-        g.drawString("Score: " + gameInfo.getScore(), HUD_RIGHT_X, HUD_RIGHT_Y + LINE_SPACING);
+        drawBackground(g);
+        drawDebris(g);
+        drawShip(g);
+        drawRocks(g);
+        drawEmps(g);
+        drawHUD(g);
     }
+
 
     @Override
     public void update(GameContainer gc, StateBasedGame sbg, int delta){
         Input input = gc.getInput();
+        debris.move();
         ship.move(input);
         rocks.stream().forEach(Rock::move);
         emps.stream().forEach(Emp::move);

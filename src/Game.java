@@ -1,8 +1,8 @@
-import javafx.scene.media.AudioClip;
 import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.Sound;
 import org.newdawn.slick.state.StateBasedGame;
 
-import java.nio.file.Paths;
 
 public class Game extends StateBasedGame{
     public static final String NAME = "Rice Rocks!";
@@ -13,7 +13,7 @@ public class Game extends StateBasedGame{
     public Game(String gameName){
         super(gameName);
         loadStates();
-        playSoundTrack("res/sounds/soundtrack.mp3");
+        playSoundTrack("res/sounds/soundtrack.ogg");
     }
 
     @Override
@@ -27,8 +27,12 @@ public class Game extends StateBasedGame{
     }
 
     private void playSoundTrack(String sound){
-        AudioClip soundTrack = new AudioClip(Paths.get(sound).toUri().toString());
-        soundTrack.play(0.4);
-        soundTrack.setCycleCount(AudioClip.INDEFINITE);
+        try {
+            Sound soundTrack = new Sound(sound);
+            soundTrack.loop();
+            soundTrack.play(1, 0.5f);
+        }catch(SlickException e){
+            e.printStackTrace();
+        }
     }
 }

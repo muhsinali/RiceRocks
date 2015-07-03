@@ -2,6 +2,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.Sound;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Circle;
 
@@ -11,15 +12,14 @@ import java.util.List;
 import javafx.scene.media.AudioClip;
 
 
-
 public class Ship extends GameObject{
     private GameInfo gameInfo;
 
+    // Resources
     public static final int HEIGHT, WIDTH;
     private static List<Image> images;
 
-    // Sounds
-    private AudioClip thrustSound;
+    private Sound thrustSound;
     private AudioClip shootEmp;
 
 
@@ -32,6 +32,8 @@ public class Ship extends GameObject{
 
     private float angle = INITIAL_ANGLE;  // in degrees & wrt vertical. Rotates clockwise.
 
+
+    // Other characteristics
     // Alpha variable is for Color. Used to adjust opacity of ship.
     public static final float HIGH_ALPHA = 1;
     public static final float LOW_ALPHA = 0.6f;
@@ -39,6 +41,7 @@ public class Ship extends GameObject{
 
     public static final int RESPAWN_PERIOD = (3 * 2 * ShipSpawner.TIME_STEP);
     private int lifetime;
+
 
     static{
         try {
@@ -108,10 +111,12 @@ public class Ship extends GameObject{
     }
 
     private void loadSounds(){
-            thrustSound = new AudioClip(Paths.get("res/sounds/thrust.mp3").toUri().toString());
-            String cools = Paths.get("res/sounds/emp.mp3").toUri().toString();      // todo cools
-            System.out.println(cools);
-            shootEmp = new AudioClip(cools);
+        try {
+            thrustSound = new Sound("res/sounds/thrust.ogg");
+            shootEmp = new AudioClip(Paths.get("res/sounds/emp.mp3").toUri().toString());
+        }catch (SlickException e){
+            e.printStackTrace();
+        }
     }
 
     public void move(Input input){
@@ -133,8 +138,8 @@ public class Ship extends GameObject{
     }
 
     private void playThrustSound(){
-        if(!thrustSound.isPlaying()) {
-            thrustSound.play(0.4);
+        if(!thrustSound.playing()) {
+            thrustSound.play(1, 0.3f);
         }
     }
 
@@ -146,12 +151,13 @@ public class Ship extends GameObject{
             float empX = positionX + alignEmpX + (float) (alignEmpX * Math.cos(Math.toRadians(angle)));
             float empY = positionY + alignEmpY + (float) (alignEmpY * Math.sin(Math.toRadians(angle)));
             gameInfo.getEmps().add(new Emp(empX, empY, velocityX, velocityY, angle));
+            shootEmp.setVolume(0.7);
             shootEmp.play();
         }
     }
 
     private void stopThrustSound(){
-        if(thrustSound.isPlaying()){
+        if(thrustSound.playing()){
             thrustSound.stop();
         }
     }
@@ -159,7 +165,7 @@ public class Ship extends GameObject{
 
     // GETTERS
     public Color getColor(){
-        return new Color(255, 255, 255, alpha);     // todo see if you need to always return a new Color obj (alpha is changing)
+        return new Color(255, 255, 255, alpha);
     }
 
     public int getLifetime(){
