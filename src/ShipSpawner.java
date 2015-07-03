@@ -1,5 +1,8 @@
 import java.util.TimerTask;
 
+/**
+ * Used to respawn the ship properly.
+ */
 public class ShipSpawner extends TimerTask {
     public static final int TIME_STEP = 500;
     private Ship ship;

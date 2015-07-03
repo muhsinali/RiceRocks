@@ -14,6 +14,7 @@ import javafx.scene.media.AudioClip;
 
 public class Ship extends GameObject{
     private GameInfo gameInfo;
+    private NoRockZone noRockZone;
 
     // Resources
     public static final int HEIGHT, WIDTH;
@@ -43,6 +44,8 @@ public class Ship extends GameObject{
     private int lifetime;
 
 
+
+
     static{
         try {
             images = loadImages(new Image("res/images/double_ship.png"), 2, 1);
@@ -60,6 +63,7 @@ public class Ship extends GameObject{
         this.gameInfo = gameInfo;
         currentImage = images.get(0);
         initialisePhysics();
+        noRockZone = new NoRockZone(this);
         loadSounds();
     }
 
@@ -135,6 +139,7 @@ public class Ship extends GameObject{
             stopThrustSound();
         }
         setPosition(positionX + velocityX, positionY + velocityY);
+        noRockZone.updateRectangle();
     }
 
     private void playThrustSound(){
@@ -163,6 +168,13 @@ public class Ship extends GameObject{
     }
 
 
+    public boolean isRockInZone(Rock rock){
+        return noRockZone.inZone(rock.getPositionX(), rock.getPositionY());
+    }
+
+
+
+
     // GETTERS
     public Color getColor(){
         return new Color(255, 255, 255, alpha);
@@ -182,6 +194,14 @@ public class Ship extends GameObject{
         lifetime = value;
     }
 
+    public void setOrientation(float value){
+        angle = value;
+        angle %= 360;
+        for(Image image : images){
+            image.setRotation(angle);
+        }
+    }
+
     public void setPosition(float x, float y){
         positionX = x;
         positionY = y;
@@ -189,11 +209,8 @@ public class Ship extends GameObject{
         collider.setLocation(positionX, positionY);
     }
 
-    public void setOrientation(float value){
-        angle = value;
-        angle %= 360;
-        for(Image image : images){
-            image.setRotation(angle);
-        }
+    public void setVelocity(float vX, float vY){
+        velocityX = vX;
+        velocityY = vY;
     }
 }

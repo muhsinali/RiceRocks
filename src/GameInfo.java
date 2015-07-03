@@ -7,7 +7,7 @@ public class GameInfo {
     private List<Rock> rocks = new ArrayList<>(Rock.MAX_ROCKS);
     private Ship ship = new Ship(this);
     private EmpManager empManager = new EmpManager(emps);
-    private RockSpawner rockSpawner = new RockSpawner(rocks);
+    private RockSpawner rockSpawner = new RockSpawner(rocks, ship);
     private ShipSpawner shipSpawner = new ShipSpawner(ship);
 
     private int livesRemaining = 3;

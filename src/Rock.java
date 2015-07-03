@@ -99,6 +99,12 @@ public class Rock extends GameObject {
         collider.setLocation(positionX, positionY);
     }
 
+    public void resetPosition(){
+        Random random = new Random();
+        positionX = (Game.FRAME_WIDTH - WIDTH) * random.nextFloat();
+        positionY = (Game.FRAME_HEIGHT - HEIGHT) * random.nextFloat();
+    }
+
     private void playExplosionSound(String sound){
         try {
             Sound explosionSound = new Sound(sound);

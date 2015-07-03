@@ -128,16 +128,16 @@ public class Play extends BasicGameState{
             }
 
             if(ship.getCollider().intersects(rock.getCollider()) && !ship.isRespawning()){
-//                rockIterator.remove();
-//                gameInfo.deductLife();
-//                if(gameInfo.getLivesRemaining() == 0){
-//                    sbg.enterState(GameState.GAME_LOST.getID());
-//                    // todo find out how to leave this state
-//                }
-//                ship.setPosition(Ship.INITIAL_POS_X, Ship.INITIAL_POS_Y);
-//                ship.setVelocity(0, 0);
-//                ship.setOrientation(Ship.INITIAL_ANGLE);
-//                ship.setLifetime(0);
+                rockIterator.remove();
+                gameInfo.deductLife();
+                if(gameInfo.getLivesRemaining() == 0){
+                    sbg.enterState(GameState.GAME_LOST.getID());
+                    // todo find out how to leave this state
+                }
+                ship.setPosition(Ship.INITIAL_POS_X, Ship.INITIAL_POS_Y);
+                ship.setVelocity(0, 0);
+                ship.setOrientation(Ship.INITIAL_ANGLE);
+                ship.setLifetime(0);
                 continue;
             }
 
