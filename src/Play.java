@@ -83,7 +83,7 @@ public class Play extends BasicGameState{
             ship = gameInfo.getShip();
             rocks = gameInfo.getRocks();
             emps = gameInfo.getEmps();
-            rocks.add(new Rock());  // todo removing this produces a bug. find out why.
+            new Rock();
 
             Date date = new Date();
             timer.schedule(gameInfo.getEmpManager(), date, EmpManager.TIME_STEP);

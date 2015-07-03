@@ -16,7 +16,9 @@ public class NoRockZone {
     }
 
     public void updateRectangle(){
-        x = ship.getPositionX() + Ship.WIDTH / 2 - width / 2;
+        // todo edit to prevent the rock from being able to spawn w/i the zone when x,y are just at the top left of the zone
+        // todo to do this, u need to include the Rock's width & height.
+        x = ship.getPositionX() + Ship.WIDTH / 2 - width / 2;   // todo find out how the ship rotating affects ship.getPositionX() & Y
         y = ship.getPositionY() + Ship.HEIGHT / 2 - height / 2;
 
         if (x < 0){
@@ -32,7 +34,7 @@ public class NoRockZone {
         }
     }
 
-    // todo needs neatening up
+    // todo needs neatening up & checking to see if it's correct.
     public boolean inZone(float rockX, float rockY){
         if(x + width > Game.FRAME_WIDTH && y + height > Game.FRAME_HEIGHT){
             return x <= rockX && rockX <= Game.FRAME_WIDTH && y <= rockY && rockY <= Game.FRAME_HEIGHT

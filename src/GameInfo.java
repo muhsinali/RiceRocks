@@ -3,8 +3,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class GameInfo {
-    private List<Emp> emps = new ArrayList<>();
-    private List<Rock> rocks = new ArrayList<>(Rock.MAX_ROCKS);
+    private List<Emp> emps = Collections.synchronizedList(new ArrayList<>());
+    private List<Rock> rocks = Collections.synchronizedList(new ArrayList<>(Rock.MAX_ROCKS));
     private Ship ship = new Ship(this);
     private EmpManager empManager = new EmpManager(emps);
     private RockSpawner rockSpawner = new RockSpawner(rocks, ship);
@@ -18,9 +18,10 @@ public class GameInfo {
         livesRemaining--;
     }
 
+
     // GETTERS
-    public List<Emp> getEmps(){
-        return Collections.synchronizedList(emps);
+    public synchronized List<Emp> getEmps(){
+        return emps;
     }
 
     public EmpManager getEmpManager(){
@@ -31,8 +32,8 @@ public class GameInfo {
         return livesRemaining;
     }
 
-    public List<Rock> getRocks(){
-        return Collections.synchronizedList(rocks);
+    public synchronized List<Rock> getRocks(){
+        return rocks;
     }
 
     public RockSpawner getRockSpawner(){

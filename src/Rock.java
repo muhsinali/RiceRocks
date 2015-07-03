@@ -27,7 +27,6 @@ public class Rock extends GameObject {
         List<Image> explosionSprites;
         try {
             currentImage = new Image("res/images/asteroid_blue.png");
-
             explosionSprites = loadImages(new Image("res/images/explosion_alpha.png"), 24, 1);
             explosion = new Animation(explosionSprites.toArray(new Image[explosionSprites.size()]), 40);
             explosion.setLooping(false);

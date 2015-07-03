@@ -18,7 +18,12 @@ public class Game extends StateBasedGame{
 
     @Override
     public void initStatesList(GameContainer gc) {
-        this.enterState(GameState.PLAY.getID());
+        try {
+            this.getState(GameState.PLAY.getID()).init(gc, this);
+            this.enterState(GameState.PLAY.getID());
+        }catch (SlickException e){
+            e.printStackTrace();
+        }
     }
 
     private void loadStates(){
