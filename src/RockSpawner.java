@@ -1,6 +1,9 @@
 import java.util.List;
 import java.util.TimerTask;
 
+// Spawns a rock at every TIME_STEP, provided that the max number of rocks hasn't been reached. The rocks are spawned
+// outisde of the ship's noRockZone (which is an area surrounding the ship). This is to prevent the ship from getting
+// destroyed by a rock before the user has a chance to shoot it.
 public class RockSpawner extends TimerTask {
     public static final int TIME_STEP = 2000;
     private List<Rock> rocks;
@@ -11,9 +14,7 @@ public class RockSpawner extends TimerTask {
         this.ship = ship;
     }
 
-
-    @Override
-    public void run(){
+    private synchronized void spawnRock(){
         if(rocks.size() < Rock.MAX_ROCKS){
             Rock rock = new Rock();
             boolean keepGoing = true;
@@ -26,5 +27,10 @@ public class RockSpawner extends TimerTask {
                 }
             }
         }
+    }
+
+    @Override
+    public void run(){
+        spawnRock();
     }
 }

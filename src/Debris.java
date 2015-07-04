@@ -1,6 +1,8 @@
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
+// todo should be a singleton.
+// Used to draw the moving debris in the back of the screen.
 public class Debris {
     private Image image;
     private float width;

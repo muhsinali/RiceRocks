@@ -3,10 +3,10 @@ import java.util.List;
 import java.util.TimerTask;
 
 public class EmpManager extends TimerTask {
-        // This class is used to check the lifetime of the missiles at specific time intervals using the ticker clases.
-    // Will need to iterate through the list of missiles that currently exist. Once lifetime is exceeded, the missile
-    // should be removed ina concurrently safe manner. The missiles list might need to become atomic as the Play class
-    // is constantly looping over it to draw and do collision detection.
+    // This class is used to check the lifetime of the EMPs at specific time intervals using the ticker clases.
+    // Will need to iterate through the list of EMPs that currently exist. Once lifetime is exceeded, the EMP
+    // should be removed in a concurrently safe manner. The EMPs list might need to become atomic as the Play class
+    // is constantly looping over it to draw and do collision detection aswell.
 
     public static final int TIME_STEP = 100;
     private List<Emp> emps;
@@ -15,8 +15,7 @@ public class EmpManager extends TimerTask {
         this.emps = emps;
     }
 
-    @Override
-    public void run(){
+    private synchronized void checkLifetimes(){
         Iterator<Emp> empIterator = emps.iterator();
         while(empIterator.hasNext()){
             Emp emp = empIterator.next();
@@ -26,5 +25,10 @@ public class EmpManager extends TimerTask {
                 emp.incrementLifetime(TIME_STEP);
             }
         }
+    }
+
+    @Override
+    public void run(){
+        checkLifetimes();
     }
 }

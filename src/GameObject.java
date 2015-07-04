@@ -1,6 +1,7 @@
 import org.newdawn.slick.Image;
 import org.newdawn.slick.geom.Shape;
 
+// Ship, Emp, and Rock inherit from this class.
 public class GameObject {
     protected float positionX, positionY;
     protected float velocityX, velocityY;

@@ -16,7 +16,7 @@ public class Rock extends GameObject {
     private Animation explosion;  // todo sh be final
 
     public final int HEIGHT, WIDTH;
-    private boolean explode;
+    private boolean explode;    // used to determine whether the rock should explode or not (e.g. if it's been hit by an emp)
 
     // Physics
     private float angle;
@@ -44,6 +44,7 @@ public class Rock extends GameObject {
         initialisePhysics();
     }
 
+    // Used to get the rock to start exploding.
     public void beginExplosion(){
         velocityX = 0;
         velocityY = 0;
@@ -51,6 +52,7 @@ public class Rock extends GameObject {
         playExplosionSound("res/sounds/explosion.ogg");
     }
 
+    // Used to draw the animation of the rock exploding
     public boolean hasExplosionBegun(){
         return explode;
     }
@@ -59,7 +61,7 @@ public class Rock extends GameObject {
         Random random = new Random();
         initialiseRotation(random);
         initialiseTranslation(random);
-        // Shape used for collision detection
+        // Collider used for collision detection
         collider = new Circle(positionX + WIDTH / 2, positionY + HEIGHT / 2, WIDTH / 2);
     }
 
@@ -98,6 +100,8 @@ public class Rock extends GameObject {
         collider.setLocation(positionX, positionY);
     }
 
+    // Used to choose another position on the screen for the rock to spawn at, if it's current co-ords are in the no
+    // rock zone.
     public void resetPosition(){
         Random random = new Random();
         positionX = (Game.FRAME_WIDTH - WIDTH) * random.nextFloat();

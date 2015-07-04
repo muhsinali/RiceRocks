@@ -148,6 +148,13 @@ public class Ship extends GameObject{
         }
     }
 
+    public void respawn(){
+        setPosition(Ship.INITIAL_POS_X, Ship.INITIAL_POS_Y);
+        setVelocity(0, 0);
+        setOrientation(Ship.INITIAL_ANGLE);
+        setLifetime(0);
+    }
+
     public void shoot(Input input){
         if(input.isKeyPressed(Input.KEY_SPACE)){
             // Ensures that the emp is centered correctly so that it looks like it comes out of the ship's canon

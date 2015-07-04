@@ -2,6 +2,8 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.SlickException;
 
+// Electromagnetic Pulse (EMP) are what Ship objects shoot to destroy the rocks. These have a lifetime as which gives the EMP
+// a specific range in which the EMP can travel before disintegrating.
 public class Emp extends GameObject{
     // STATIC VARS
     public static float MAX_LIFETIME = 600;

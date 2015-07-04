@@ -3,7 +3,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.state.StateBasedGame;
 
-
+// This class sets up the game and deals with the different GameStates.
 public class Game extends StateBasedGame{
     public static final String NAME = "Rice Rocks!";
 
